@@ -11,6 +11,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "ThirdPersonProjectile.h"
+#include "GameFramework/GameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -62,6 +64,10 @@ AThirdPersonMPCharacter::AThirdPersonMPCharacter()
 	FireRate = 0.25f;
 	bFiringWeapon = false;
 	ProjectileClass = AThirdPersonProjectile::StaticClass();
+
+	// Initialize destruction vars
+	DestructionTime = 3.6f;
+	bDead = false;
 }
 
 void AThirdPersonMPCharacter::SetCurrentHealth(float const InHealthValue) noexcept
@@ -90,7 +96,7 @@ void AThirdPersonMPCharacter::OnHealthUpdate() noexcept
 		FString const LHealthMessage = FString::Printf(TEXT("You now have %f health remaining."), CurrentHealth);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, LHealthMessage);
 
-		if(CurrentHealth <= 0)
+		if(CurrentHealth <= 0 && !bDead)
 		{
 			FString const LDeathMessage = FString::Printf(TEXT("You have been killed."));
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, LDeathMessage);
@@ -102,6 +108,13 @@ void AThirdPersonMPCharacter::OnHealthUpdate() noexcept
 	{
 		FString const LHealthMessage = FString::Printf(TEXT("%s now have %f health remaining."), *GetFName().ToString(), CurrentHealth);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, LHealthMessage);
+
+		// Utilize the opprotunity of being on the server, and restart the player right away
+		if(CurrentHealth <= 0 && !bDead)
+		{
+			// While restarting. Destroy this pawn.
+			PlayerDie();
+		}
 	}
 
 	// Any other logic to trigger both on server or client shoudl be added here
@@ -146,6 +159,30 @@ void AThirdPersonMPCharacter::HandleFire_Implementation()
 
 	// Spawn actor at the server
 	GetWorld()->SpawnActor<AThirdPersonProjectile>(ProjectileClass, LSpawnLocation, LSpawnRotation, LSpawnParameters);
+}
+
+void AThirdPersonMPCharacter::PlayerDie()
+{
+	// Ensure to call only on the server
+	if(ensureMsgf(GetLocalRole() == ROLE_Authority, TEXT("Bad function call. %s can be called only on the server!"),
+		*FString(__FUNCTION__)))
+	{
+		// Set state of the player as dead
+		bDead = true;
+		
+		// Simulate physics for the mesh to immitate player's death
+		GetMesh()->SetAllBodiesSimulatePhysics(true);
+
+		GetWorld()->GetTimerManager().SetTimer(DestroyDelayTimer, [this]
+		{
+			
+			// Notify anyone who was expecting the player to be dead
+			OnPlayerDied.Broadcast();
+			Destroy();
+		
+		}, DestructionTime, false);
+		
+	}
 }
 
 void AThirdPersonMPCharacter::BeginPlay()
@@ -195,6 +232,7 @@ void AThirdPersonMPCharacter::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AThirdPersonMPCharacter, CurrentHealth);
+	DOREPLIFETIME(AThirdPersonMPCharacter, bDead);
 }
 
 void AThirdPersonMPCharacter::Move(const FInputActionValue& Value)

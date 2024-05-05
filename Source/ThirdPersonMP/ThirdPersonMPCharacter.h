@@ -15,6 +15,8 @@ struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDiedSignature);
+
 UCLASS(config=Game)
 class AThirdPersonMPCharacter : public ACharacter
 {
@@ -73,29 +75,34 @@ public:
 	
 protected:
 	
+#pragma region Gameplay
+	
 #pragma region Health
 
 	// Max health that isn't changed throughout the whole game
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Health")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Gameplay|Health")
 	float MaxHealth;
 
 	// Current health of this character. By default is set to MaxHealth
 	UPROPERTY(ReplicatedUsing=OnRep_CurrentHealth)
 	float CurrentHealth;
 
+	UPROPERTY(BlueprintReadOnly, Replicated, Category="Gameplay|Health")
+	bool bDead;
+	
 public:
 
 	// Setter for current health. Should only be called on the server. Ensured to be called on the server
-	UFUNCTION(BlueprintCallable, Category="Health")
+	UFUNCTION(BlueprintCallable, Category="Gameplay|Health")
 	void SetCurrentHealth(float const InHealthValue) noexcept;
 
 	// Returns CurrentHealth
-	UFUNCTION(BlueprintPure, Category="Health")
+	UFUNCTION(BlueprintPure, Category="Gameplay|Health")
 	FORCEINLINE float GetMaxHealth() const noexcept
 	{ return MaxHealth; }
 	
 	// Returns MaxHealth
-	UFUNCTION(BlueprintPure, Category="Health")
+	UFUNCTION(BlueprintPure, Category="Gameplay|Health")
 	FORCEINLINE float GetCurrentHealth() const noexcept
 	{ return CurrentHealth; }
 
@@ -110,7 +117,7 @@ protected:
 
 #pragma endregion
 	
-#pragma region Damage
+#pragma region Events
 	
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	
@@ -149,16 +156,42 @@ protected:
 	void HandleFire();
 	
 #pragma endregion
+
+#pragma region Destruction
+public:
+
+	FORCEINLINE FOnPlayerDiedSignature& GetOnPlayerDied() noexcept { return OnPlayerDied; }
+	
+protected:
+
+	// Triggered whenever character's health reaches 0.
+	UPROPERTY(BlueprintAssignable, Category="Gameplay|Destruction")
+	FOnPlayerDiedSignature OnPlayerDied;
+
+	// The amount of time before the actor will be destroyed
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Gameplay|Destruction")
+	float DestructionTime;
+	
+	// Timer for the destruction delay
+	FTimerHandle DestroyDelayTimer;
+
+	// Destroys this pawn and notifies other bound objects about it.
+	// Also simulates physics for local mesh
+	// Should be called only on the server
+	UFUNCTION(BlueprintCallable, Category="Gameplay|Destruction")
+	void PlayerDie();
+
+#pragma endregion
+	
+	// To add mapping context
+	virtual void BeginPlay() override;
+	
+#pragma endregion
 	
 protected:
 	
 	// Add new replicated properties to this function if any appear
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	
-protected:
-	
-	// To add mapping context
-	virtual void BeginPlay() override;
 
 public:
 	/** Returns CameraBoom subobject **/

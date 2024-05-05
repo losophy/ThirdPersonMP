@@ -13,6 +13,12 @@ class AThirdPersonMPGameMode : public AGameModeBase
 
 public:
 	AThirdPersonMPGameMode();
+
+#pragma region Gameplay
+
+	virtual void RestartPlayer(AController* NewPlayer) override;
+	
+#pragma endregion
 };
 
 

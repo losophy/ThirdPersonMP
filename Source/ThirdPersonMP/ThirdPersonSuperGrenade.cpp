@@ -30,7 +30,7 @@ void AThirdPersonSuperGrenade::SpawnGrenades_Implementation()
 		LSpawnParameters.Owner = this;
 		
 		// Spawn the grenade at the server
-		if(!ensureAlwaysMsgf(GrenadeClass->IsChildOf(AThirdPersonSuperGrenade::StaticClass()), TEXT("Bad class! You shouldn't use"
+		if(ensureAlwaysMsgf(!GrenadeClass->IsChildOf(AThirdPersonSuperGrenade::StaticClass()), TEXT("Bad class! You shouldn't use"
 																							  "Super grenade as the additional throwing class")))
 			
 			GetWorld()->SpawnActor<AThirdPersonGrenade>(GrenadeClass, LSpawnLocation, LDirection.Rotation(), LSpawnParameters);
