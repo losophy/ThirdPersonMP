@@ -11,8 +11,6 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "ThirdPersonProjectile.h"
-#include "GameFramework/GameModeBase.h"
-#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
