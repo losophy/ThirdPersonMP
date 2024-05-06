@@ -116,6 +116,9 @@ void AThirdPersonMPCharacter::OnHealthUpdate() noexcept
 	}
 
 	// Any other logic to trigger both on server or client shoudl be added here
+
+	// Broadcast health update both locally and on the server
+	OnPlayerHealthUpdate.Broadcast(CurrentHealth);
 }
 
 float AThirdPersonMPCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,

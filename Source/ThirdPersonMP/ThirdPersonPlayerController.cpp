@@ -2,10 +2,23 @@
 
 
 #include "ThirdPersonPlayerController.h"
-
 #include "ThirdPersonMPCharacter.h"
+#include "ThirdPersonMainWindow.h"
+#include "Blueprint/UserWidget.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+
+AThirdPersonPlayerController::AThirdPersonPlayerController()
+{
+	// Set the default class to the blueprinted one
+	static ConstructorHelpers::FClassFinder<UThirdPersonMainWindow>
+	DefaultMainWindowClass(TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonMainWindow.BP_ThirdPersonMainWindow"));
+
+	if(DefaultMainWindowClass.Class)
+	{
+		MainWindowClass = DefaultMainWindowClass.Class;
+	}
+}
 
 void AThirdPersonPlayerController::OnPossess(APawn* InPawn)
 {
@@ -16,7 +29,8 @@ void AThirdPersonPlayerController::OnPossess(APawn* InPawn)
 	{
 		if(auto const AsThirdPerson = Cast<AThirdPersonMPCharacter>(InPawn))
 		{
-			AsThirdPerson->GetOnPlayerDied().AddDynamic(this, &AThirdPersonPlayerController::OnControlledPawnDie);
+			AsThirdPerson->GetOnPlayerDied().AddUniqueDynamic(this, &AThirdPersonPlayerController::OnControlledPawnDie);
+			AsThirdPerson->GetOnPlayerHealthUpdate().AddUniqueDynamic(this, &AThirdPersonPlayerController::OnPawnHealthUpdate);
 		}
 	}
 }
@@ -31,4 +45,26 @@ void AThirdPersonPlayerController::RespawnPlayer_Implementation()
 void AThirdPersonPlayerController::OnControlledPawnDie()
 {
 	Execute_RespawnPlayer(this);
+}
+
+void AThirdPersonPlayerController::OnPawnHealthUpdate(float const InUpdatedHealth)
+{
+	// Client-only logic
+	if(IsLocalController())
+	{
+		MainWindow->UpdateHealth(InUpdatedHealth);
+	}
+}
+
+void AThirdPersonPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// We want to create UI only locally for a player.
+	if(IsLocalController())
+	{
+		// Create main window
+		MainWindow = CreateWidget<UThirdPersonMainWindow>(this, MainWindowClass);
+	}
+	
 }

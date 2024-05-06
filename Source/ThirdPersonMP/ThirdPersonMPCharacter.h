@@ -16,6 +16,7 @@ struct FInputActionValue;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDiedSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerHealthUpdateSignature, float const, InUpdatedHealth);
 
 UCLASS(config=Game)
 class AThirdPersonMPCharacter : public ACharacter
@@ -89,6 +90,10 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Replicated, Category="Gameplay|Health")
 	bool bDead;
+
+	// Triggered when player's health is updated.
+	UPROPERTY(BlueprintAssignable, Category="Gameplay|Health")
+	FOnPlayerHealthUpdateSignature OnPlayerHealthUpdate;
 	
 public:
 
@@ -109,6 +114,9 @@ public:
 	// Function that is triggered in response to CurrentHealth variable being replicated
 	UFUNCTION()
 	void OnRep_CurrentHealth();
+
+	FORCEINLINE FOnPlayerHealthUpdateSignature& GetOnPlayerHealthUpdate() noexcept
+	{ return OnPlayerHealthUpdate; }
 
 protected:
 
