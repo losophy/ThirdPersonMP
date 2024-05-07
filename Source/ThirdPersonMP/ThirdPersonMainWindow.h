@@ -29,7 +29,7 @@ public:
 protected:
 
 	// Currently replicated player health
-	UPROPERTY(BlueprintReadOnly, Category="UI|Health")
+	UPROPERTY(BlueprintReadOnly, meta=(ClampMin = 0.f, ClampMax = 1.f), Category="UI|Health")
 	float CurrentPlayerHealth = 0.f;
 	
 #pragma endregion
@@ -38,9 +38,22 @@ protected:
 	
 protected:
 	// The amount of players currently in the
-	// world that is displayer locally for each user
+	// world that is displayed locally for each user
 	UPROPERTY(BlueprintReadOnly, Category="UI|Stats")
 	int32 PlayersNum = 0;
+
+	// The actual widget of leaderboard that is displayed at the center for a player
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Transient, meta=(BindWidget = true), Category = "UI")
+	class UThirdPersonLeaderboardWidget* LeaderboardWidget;
+	
+public:
+	// Shows the leaderboard widget on the screen
+	UFUNCTION(BlueprintCallable, Category="UI|Stats")
+	void DisplayLeaderboard();
+
+	// Hides leaderboard widget
+	UFUNCTION(BlueprintCallable, Category="UI|Stats")
+	void HideLeaderboard();
 	
 #pragma endregion
 };

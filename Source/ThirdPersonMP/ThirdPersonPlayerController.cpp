@@ -2,14 +2,18 @@
 
 
 #include "ThirdPersonPlayerController.h"
+
+#include "EnhancedInputComponent.h"
 #include "ThirdPersonMPCharacter.h"
 #include "ThirdPersonMainWindow.h"
+#include "ThirdPersonStatsComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 
 AThirdPersonPlayerController::AThirdPersonPlayerController()
 {
+	
 	// Set the default class to the blueprinted one
 	static ConstructorHelpers::FClassFinder<UThirdPersonMainWindow>
 	DefaultMainWindowClass(TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonMainWindow.BP_ThirdPersonMainWindow"));
@@ -18,6 +22,9 @@ AThirdPersonPlayerController::AThirdPersonPlayerController()
 	{
 		MainWindowClass = DefaultMainWindowClass.Class;
 	}
+	
+	// Enable replication for this controller
+	bReplicates = true;
 }
 
 void AThirdPersonPlayerController::OnPossess(APawn* InPawn)
@@ -67,4 +74,34 @@ void AThirdPersonPlayerController::BeginPlay()
 		MainWindow = CreateWidget<UThirdPersonMainWindow>(this, MainWindowClass);
 	}
 	
+}
+
+void AThirdPersonPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	/*if(UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
+	{
+		ensureMsgf(TabAction, TEXT("Bad action reference!"));
+
+		EnhancedInputComponent->BindAction(TabAction, ETriggerEvent::Started, this, &AThirdPersonPlayerController::OnTabActionStarted);
+		EnhancedInputComponent->BindAction(TabAction, ETriggerEvent::Completed, this,
+		                           &AThirdPersonPlayerController::OnTabActionCompleted);
+	}*/
+}
+
+void AThirdPersonPlayerController::OnTabActionStarted()
+{
+	if(GetLocalRole() != ROLE_Authority)
+	{
+		MainWindow->DisplayLeaderboard();
+	}
+}
+
+void AThirdPersonPlayerController::OnTabActionCompleted()
+{
+	if(GetLocalRole() != ROLE_Authority)
+	{
+		MainWindow->HideLeaderboard();
+	}
 }

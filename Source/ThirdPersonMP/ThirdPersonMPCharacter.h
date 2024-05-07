@@ -33,10 +33,19 @@ class AThirdPersonMPCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UThirdPersonStatsComponent* PlayerStats;
+
+public:
+
+	// Ensures safe getter of PlayerStats only on the server. returns nullptr if called on a client
+	UFUNCTION(BlueprintPure, Category = "Player|Stats")
+	class UThirdPersonStatsComponent* GetPlayerStats_Server() const noexcept;
+
 #pragma endregion
 
 #pragma region Input
-	
+protected:
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
@@ -81,33 +90,33 @@ protected:
 #pragma region Health
 
 	// Max health that isn't changed throughout the whole game
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Gameplay|Health")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Health")
 	float MaxHealth;
 
 	// Current health of this character. By default is set to MaxHealth
 	UPROPERTY(ReplicatedUsing=OnRep_CurrentHealth)
 	float CurrentHealth;
 
-	UPROPERTY(BlueprintReadOnly, Replicated, Category="Gameplay|Health")
+	UPROPERTY(BlueprintReadOnly, Replicated, Category="Character|Health")
 	bool bDead;
 
 	// Triggered when player's health is updated.
-	UPROPERTY(BlueprintAssignable, Category="Gameplay|Health")
+	UPROPERTY(BlueprintAssignable, Category="Character|Health")
 	FOnPlayerHealthUpdateSignature OnPlayerHealthUpdate;
 	
 public:
 
 	// Setter for current health. Should only be called on the server. Ensured to be called on the server
-	UFUNCTION(BlueprintCallable, Category="Gameplay|Health")
+	UFUNCTION(BlueprintCallable, Category="Character|Health")
 	void SetCurrentHealth(float const InHealthValue) noexcept;
 
 	// Returns CurrentHealth
-	UFUNCTION(BlueprintPure, Category="Gameplay|Health")
+	UFUNCTION(BlueprintPure, Category="Character|Health")
 	FORCEINLINE float GetMaxHealth() const noexcept
 	{ return MaxHealth; }
 	
 	// Returns MaxHealth
-	UFUNCTION(BlueprintPure, Category="Gameplay|Health")
+	UFUNCTION(BlueprintPure, Category="Character|Health")
 	FORCEINLINE float GetCurrentHealth() const noexcept
 	{ return CurrentHealth; }
 
@@ -136,11 +145,11 @@ protected:
 protected:
 
 	// When firing, will spawn a projectile of this class
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Gameplay|Fire")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Fire")
 	TSubclassOf<class AThirdPersonProjectile> ProjectileClass;
 	
 	// Controls how often the player can fire his weapon. Keep it at least 0.25 as frequent RPC calls may overflow the bandwith
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Gameplay|Fire")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Fire")
 	float FireRate;
 
 	// State flag to control firing flow
@@ -152,11 +161,11 @@ protected:
 	//@Note: StartFire and StopFire are protections measures from frequent RPC calls
 	
 	// Function that is bound to FireAction input and is the starting point of the action
-	UFUNCTION(BlueprintCallable, Category="Gameplay|Fire")
+	UFUNCTION(BlueprintCallable, Category="Character|Fire")
 	void StartFire();
 
 	// Function that stops firing, which allows player to perform action again. 
-	UFUNCTION(BlueprintCallable,  Category="Gameplay|Fire")
+	UFUNCTION(BlueprintCallable,  Category="Character|Fire")
 	void StopFire();
 
 	// Function that is called on the server. It is reliable and should be called with caution, avoiding any frequent use
@@ -173,11 +182,11 @@ public:
 protected:
 
 	// Triggered whenever character's health reaches 0.
-	UPROPERTY(BlueprintAssignable, Category="Gameplay|Destruction")
+	UPROPERTY(BlueprintAssignable, Category="Character|Destruction")
 	FOnPlayerDiedSignature OnPlayerDied;
 
 	// The amount of time before the actor will be destroyed
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Gameplay|Destruction")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Destruction")
 	float DestructionTime;
 	
 	// Timer for the destruction delay
@@ -186,10 +195,11 @@ protected:
 	// Destroys this pawn and notifies other bound objects about it.
 	// Also simulates physics for local mesh
 	// Should be called only on the server
-	UFUNCTION(BlueprintCallable, Category="Gameplay|Destruction")
+	UFUNCTION(BlueprintCallable, Category="Character|Destruction")
 	void PlayerDie();
 
 #pragma endregion
+
 	
 	// To add mapping context
 	virtual void BeginPlay() override;

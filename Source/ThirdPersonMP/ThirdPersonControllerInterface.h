@@ -24,9 +24,12 @@ class THIRDPERSONMP_API IThirdPersonControllerInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-
+#pragma region Respawn
+	
 	// Should respawn currently controlled player in the world
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Gameplay|Controller")
 	void RespawnPlayer();
+
+#pragma endregion
 	
 };

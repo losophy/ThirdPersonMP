@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "ThirdPersonProjectile.h"
+#include "ThirdPersonStatsComponent.h"
 #include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -66,6 +67,9 @@ AThirdPersonMPCharacter::AThirdPersonMPCharacter()
 	// Initialize destruction vars
 	DestructionTime = 3.6f;
 	bDead = false;
+
+	PlayerStats = CreateDefaultSubobject<UThirdPersonStatsComponent>(TEXT("PlayerStats"));
+	PlayerStats->RegisterComponent();
 }
 
 void AThirdPersonMPCharacter::SetCurrentHealth(float const InHealthValue) noexcept
@@ -203,6 +207,16 @@ void AThirdPersonMPCharacter::BeginPlay()
 
 //////////////////////////////////////////////////////////////////////////
 // Input
+
+UThirdPersonStatsComponent* AThirdPersonMPCharacter::GetPlayerStats_Server() const noexcept
+{
+	if(ensureMsgf(GetLocalRole() == ROLE_Authority, TEXT("Bad role!")))
+	{
+		return PlayerStats;
+	}
+
+	return nullptr;
+}
 
 void AThirdPersonMPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

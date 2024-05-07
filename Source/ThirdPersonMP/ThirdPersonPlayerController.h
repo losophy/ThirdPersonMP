@@ -7,6 +7,7 @@
 #include "ThirdPersonControllerInterface.h"
 #include "ThirdPersonPlayerController.generated.h"
 
+class UInputAction;
 /**
  * Implements ThirdPersonControllerInterface and realises
  * respawning logic
@@ -44,6 +45,7 @@ protected:
 #pragma region Health
 	
 protected:
+	
 	// Triggered when the player's health updated
 	UFUNCTION()
 	void OnPawnHealthUpdate(float const InUpdatedHealth);
@@ -55,6 +57,22 @@ protected:
 
 #pragma endregion
 
+#pragma region Input
+protected:
+
+	// Tab action is a binding to show the leaderboard widget
+	UPROPERTY(EditDefaultsOnly, Category="Player|Input")
+	UInputAction* TabAction;
+
+	// Setup custom input bindings for this controller
+	virtual void SetupInputComponent() override;
+
+	// Triggered when tab pressed or release
+	void OnTabActionStarted();
+	void OnTabActionCompleted();
+
+#pragma endregion
+	
 #pragma region UI
 protected:
 

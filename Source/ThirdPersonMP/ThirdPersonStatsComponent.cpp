@@ -3,13 +3,17 @@
 
 #include "ThirdPersonStatsComponent.h"
 
+#include "Net/UnrealNetwork.h"
+
 // Sets default values for this component's properties
 UThirdPersonStatsComponent::UThirdPersonStatsComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
+	PrimaryComponentTick.bCanEverTick = false;
+	
+	// Enable replication
+	SetIsReplicatedByDefault(true);
 	// ...
 }
 
@@ -23,12 +27,32 @@ void UThirdPersonStatsComponent::BeginPlay()
 	
 }
 
-
-// Called every frame
-void UThirdPersonStatsComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UThirdPersonStatsComponent::AddKillsCount(int32 const InAddCount)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
+	if(GetOwnerRole() == ROLE_Authority)
+	{
+		Stats.KillsCount += InAddCount;
+	}
 }
 
+void UThirdPersonStatsComponent::AddDeathsCount(int32 const InAddCount)
+{
+	if(GetOwnerRole() == ROLE_Authority)
+	{
+		Stats.DeathsCount += InAddCount;
+	}
+}
+
+void UThirdPersonStatsComponent::AddScore(float const InAddScore)
+{
+	if(GetOwnerRole() == ROLE_Authority)
+	{
+		Stats.Score += InAddScore;
+	}
+}
+
+void UThirdPersonStatsComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UThirdPersonStatsComponent, Stats);
+}
