@@ -30,7 +30,7 @@ protected:
 
 	// Currently replicated player health
 	UPROPERTY(BlueprintReadOnly, meta=(ClampMin = 0.f, ClampMax = 1.f), Category="UI|Health")
-	float CurrentPlayerHealth = 0.f;
+	float CurrentPlayerHealth = 1.f;
 	
 #pragma endregion
 

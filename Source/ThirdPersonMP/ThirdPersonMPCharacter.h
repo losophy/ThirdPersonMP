@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ThirdPersonStats.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "ThirdPersonMPCharacter.generated.h"
@@ -19,7 +20,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDiedSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerHealthUpdateSignature, float const, InUpdatedHealth);
 
 UCLASS(config=Game)
-class AThirdPersonMPCharacter : public ACharacter
+class AThirdPersonMPCharacter : public ACharacter, public IThirdPersonStats
 {
 	GENERATED_BODY()
 	
@@ -78,6 +79,16 @@ protected:
 	void Look(const FInputActionValue& Value);
 	
 #pragma endregion
+
+#pragma region Stats
+
+public:
+
+	virtual void AddKill_Implementation() override;
+	virtual void AddDeath_Implementation() override;
+	virtual void AddScore_Implementation(float const InAddedScore) override;
+	
+#pragma endregion
 	
 public:
 	
@@ -97,7 +108,7 @@ protected:
 	UPROPERTY(ReplicatedUsing=OnRep_CurrentHealth)
 	float CurrentHealth;
 
-	UPROPERTY(BlueprintReadOnly, Replicated, Category="Character|Health")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_bDead, Category="Character|Health")
 	bool bDead;
 
 	// Triggered when player's health is updated.
@@ -123,6 +134,10 @@ public:
 	// Function that is triggered in response to CurrentHealth variable being replicated
 	UFUNCTION()
 	void OnRep_CurrentHealth();
+	void OnDeathUpdate();
+
+	UFUNCTION()
+	void OnRep_bDead();
 
 	FORCEINLINE FOnPlayerHealthUpdateSignature& GetOnPlayerHealthUpdate() noexcept
 	{ return OnPlayerHealthUpdate; }
@@ -135,6 +150,10 @@ protected:
 #pragma endregion
 	
 #pragma region Events
+
+	// The last actor that caused damage to this character
+	UPROPERTY(BlueprintReadOnly, Transient, Replicated, Category="Damage")
+	AController* MyLastDamageInstigator;
 	
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	

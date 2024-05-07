@@ -72,6 +72,7 @@ void AThirdPersonPlayerController::BeginPlay()
 	{
 		// Create main window
 		MainWindow = CreateWidget<UThirdPersonMainWindow>(this, MainWindowClass);
+		MainWindow->AddToViewport();
 	}
 	
 }
@@ -80,14 +81,14 @@ void AThirdPersonPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	/*if(UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
+	if(UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
 	{
 		ensureMsgf(TabAction, TEXT("Bad action reference!"));
 
 		EnhancedInputComponent->BindAction(TabAction, ETriggerEvent::Started, this, &AThirdPersonPlayerController::OnTabActionStarted);
 		EnhancedInputComponent->BindAction(TabAction, ETriggerEvent::Completed, this,
 		                           &AThirdPersonPlayerController::OnTabActionCompleted);
-	}*/
+	}
 }
 
 void AThirdPersonPlayerController::OnTabActionStarted()

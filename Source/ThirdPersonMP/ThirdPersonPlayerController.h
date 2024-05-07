@@ -8,6 +8,8 @@
 #include "ThirdPersonPlayerController.generated.h"
 
 class UInputAction;
+class UThirdPersonMainWindow;
+
 /**
  * Implements ThirdPersonControllerInterface and realises
  * respawning logic
@@ -78,11 +80,11 @@ protected:
 
 	// Class from which we should instantiate our MainWindow widget
 	UPROPERTY(EditDefaultsOnly, Category="UI")
-	TSubclassOf<class UThirdPersonMainWindow> MainWindowClass;
+	TSubclassOf<UThirdPersonMainWindow> MainWindowClass;
 	
 	// The main window of the character being controlled
 	UPROPERTY(BlueprintReadOnly, Category="UI")
-	class UThirdPersonMainWindow* MainWindow;
+	UThirdPersonMainWindow* MainWindow;
 	
 #pragma endregion
 };

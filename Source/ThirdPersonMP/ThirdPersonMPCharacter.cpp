@@ -59,6 +59,8 @@ AThirdPersonMPCharacter::AThirdPersonMPCharacter()
 	MaxHealth = 100.f;
 	CurrentHealth = MaxHealth;
 
+	MyLastDamageInstigator = nullptr;
+
 	// Initialize fire specific memebers
 	FireRate = 0.25f;
 	bFiringWeapon = false;
@@ -84,6 +86,25 @@ void AThirdPersonMPCharacter::SetCurrentHealth(float const InHealthValue) noexce
 void AThirdPersonMPCharacter::OnRep_CurrentHealth()
 {
 	OnHealthUpdate();
+}
+
+void AThirdPersonMPCharacter::OnDeathUpdate()
+{
+	// Add death to myself
+	Execute_AddDeath(this);
+	
+	if(MyLastDamageInstigator)
+	{
+		if(auto const ControlledPawn = MyLastDamageInstigator->GetPawn(); ControlledPawn->Implements<UThirdPersonStats>())
+
+			// Notify the damage causer about successfull kill
+			IThirdPersonStats::Execute_AddKill(ControlledPawn);
+	}
+}
+
+void AThirdPersonMPCharacter::OnRep_bDead()
+{
+	OnDeathUpdate();
 }
 
 void AThirdPersonMPCharacter::OnHealthUpdate() noexcept
@@ -128,6 +149,7 @@ void AThirdPersonMPCharacter::OnHealthUpdate() noexcept
 float AThirdPersonMPCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	AController* EventInstigator, AActor* DamageCauser)
 {
+	MyLastDamageInstigator = EventInstigator;
 	float const LAppliedDamage = CurrentHealth - DamageAmount;
 	SetCurrentHealth(LAppliedDamage);
 	return LAppliedDamage;
@@ -174,6 +196,7 @@ void AThirdPersonMPCharacter::PlayerDie()
 	{
 		// Set state of the player as dead
 		bDead = true;
+		OnDeathUpdate();
 		
 		// Simulate physics for the mesh to immitate player's death
 		GetMesh()->SetAllBodiesSimulatePhysics(true);
@@ -248,6 +271,7 @@ void AThirdPersonMPCharacter::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 
 	DOREPLIFETIME(AThirdPersonMPCharacter, CurrentHealth);
 	DOREPLIFETIME(AThirdPersonMPCharacter, bDead);
+	DOREPLIFETIME(AThirdPersonMPCharacter, MyLastDamageInstigator);
 }
 
 void AThirdPersonMPCharacter::Move(const FInputActionValue& Value)
@@ -284,4 +308,23 @@ void AThirdPersonMPCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AThirdPersonMPCharacter::AddKill_Implementation()
+{
+	IThirdPersonStats::AddKill_Implementation();
+	PlayerStats->AddKillsCount();
+	PlayerStats->AddScore(250.f);
+}
+
+void AThirdPersonMPCharacter::AddDeath_Implementation()
+{
+	IThirdPersonStats::AddDeath_Implementation();
+	PlayerStats->AddDeathsCount();
+}
+
+void AThirdPersonMPCharacter::AddScore_Implementation(float const InAddedScore)
+{
+	IThirdPersonStats::AddScore_Implementation(InAddedScore);
+	PlayerStats->AddScore(InAddedScore);
 }

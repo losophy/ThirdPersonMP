@@ -48,7 +48,8 @@ protected:
 	// Currently held player's stats
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Player|Stats")
 	FPlayerStats Stats;
-
+	
+public:
 	// Adds a number to the kills count in stats. By default, adds one kill
 	UFUNCTION(BlueprintCallable, Category = "Player|Stats")
 	void AddKillsCount(int32 const InAddCount = 1);

@@ -35,11 +35,13 @@ UCLASS()
 class THIRDPERSONMP_API UThirdPersonLeaderboardWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 protected:
 
 	// List of all players in the world
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BindWidget = true), Category = "Widgets")
 	class UListView* PlayersList;
-	
+
+	// Override to initialize the players list
+	virtual void NativeConstruct() override;
 };
