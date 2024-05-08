@@ -8,6 +8,8 @@
 #include "ThirdPersonLeaderboardWidget.generated.h"
 
 
+class AThirdPersonPlayerState;
+
 /* Subclass for UThirdPersonLeaderboardWidget that
  * realises an entry for the list view
  */
@@ -18,8 +20,9 @@ class UThirdPersonLeaderboardElement : public UUserWidget, public IUserObjectLis
 
 protected:
 
-	UPROPERTY(BlueprintReadOnly, Category="Data")
-	class UThirdPersonStatsComponent* PlayerStatComponent = nullptr;
+	// Internal pointer to player state from which we get stats data info
+	UPROPERTY(BlueprintReadOnly, Transient, Category="Stats")
+	AThirdPersonPlayerState* PlayerState = nullptr;
 	
 	// Override to initialize data
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;

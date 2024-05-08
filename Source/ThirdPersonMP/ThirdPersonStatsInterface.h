@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "ThirdPersonStats.generated.h"
+#include "ThirdPersonStatsInterface.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UThirdPersonStats : public UInterface
+class UThirdPersonStatsInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,7 +16,7 @@ class UThirdPersonStats : public UInterface
 /**
  * 
  */
-class THIRDPERSONMP_API IThirdPersonStats
+class THIRDPERSONMP_API IThirdPersonStatsInterface
 {
 	GENERATED_BODY()
 

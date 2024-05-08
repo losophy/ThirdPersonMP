@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ThirdPersonStats.h"
+#include "ThirdPersonStatsInterface.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "ThirdPersonMPCharacter.generated.h"
@@ -20,7 +20,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDiedSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerHealthUpdateSignature, float const, InUpdatedHealth);
 
 UCLASS(config=Game)
-class AThirdPersonMPCharacter : public ACharacter, public IThirdPersonStats
+class AThirdPersonMPCharacter : public ACharacter
 {
 	GENERATED_BODY()
 	
@@ -33,16 +33,7 @@ class AThirdPersonMPCharacter : public ACharacter, public IThirdPersonStats
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UThirdPersonStatsComponent* PlayerStats;
-
-public:
-
-	// Ensures safe getter of PlayerStats only on the server. returns nullptr if called on a client
-	UFUNCTION(BlueprintPure, Category = "Player|Stats")
-	class UThirdPersonStatsComponent* GetPlayerStats_Server() const noexcept;
-
+	
 #pragma endregion
 
 #pragma region Input
@@ -77,16 +68,6 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-	
-#pragma endregion
-
-#pragma region Stats
-
-public:
-
-	virtual void AddKill_Implementation() override;
-	virtual void AddDeath_Implementation() override;
-	virtual void AddScore_Implementation(float const InAddedScore) override;
 	
 #pragma endregion
 	
