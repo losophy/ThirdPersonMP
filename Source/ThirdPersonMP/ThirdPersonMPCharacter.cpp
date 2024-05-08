@@ -10,8 +10,13 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "ThirdPersonGameModeInterface.h"
 #include "ThirdPersonProjectile.h"
+#include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
+#include "GameFramework/GameModeBase.h"
 #include "GameFramework/PlayerState.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -71,6 +76,34 @@ AThirdPersonMPCharacter::AThirdPersonMPCharacter()
 	bDead = false;
 }
 
+void AThirdPersonMPCharacter::OnMaterialInstanceLoad()
+{
+	if(ensureMsgf(DeathMaterialInstance, TEXT("Bad material instance load!")))
+	{
+		// Set all materials to the death instance
+		for (int32 i = 0; i < GetMesh()->GetMaterials().Num(); ++i)
+		{
+			GetMesh()->SetMaterial(i, DeathMaterialInstance.Get());
+		}
+	}
+}
+
+void AThirdPersonMPCharacter::PaintMesh_Implementation()
+{
+	// Asynchronously load material instance if not valid
+	if(!DeathMaterialInstance.IsValid())
+	{
+		UAssetManager::GetStreamableManager().RequestAsyncLoad(
+			DeathMaterialInstance.ToSoftObjectPath(),
+			FStreamableDelegate::CreateUObject(this, &AThirdPersonMPCharacter::OnMaterialInstanceLoad)
+		);
+	}
+	else
+	{
+		OnMaterialInstanceLoad();
+	}
+}
+
 void AThirdPersonMPCharacter::SetCurrentHealth(float const InHealthValue) noexcept
 {
 	if(GetLocalRole() == ROLE_Authority)
@@ -87,23 +120,14 @@ void AThirdPersonMPCharacter::OnRep_CurrentHealth()
 
 void AThirdPersonMPCharacter::OnDeathUpdate()
 {
-	// Add death to myself
-	IThirdPersonStatsInterface::Execute_AddDeath(
-		GetController()->PlayerState
-	);
-	
-	if(MyLastDamageInstigator)
+	if(GetLocalRole() == ROLE_Authority)
 	{
-		// Count kill to the 
-		IThirdPersonStatsInterface::Execute_AddKill(
-			MyLastDamageInstigator->PlayerState
-		);
+		auto const GameMode = UGameplayStatics::GetGameMode(this);
+		IThirdPersonGameModeInterface::Execute_HandlePlayerKilled(GameMode,
+				MyLastDamageInstigator,
+				GetController()
+			);
 	}
-}
-
-void AThirdPersonMPCharacter::OnRep_bDead()
-{
-	OnDeathUpdate();
 }
 
 void AThirdPersonMPCharacter::OnHealthUpdate() noexcept
@@ -197,8 +221,8 @@ void AThirdPersonMPCharacter::PlayerDie()
 		bDead = true;
 		OnDeathUpdate();
 		
-		// Simulate physics for the mesh to immitate player's death
-		GetMesh()->SetAllBodiesSimulatePhysics(true);
+		// Paint mesh on all clients
+		PaintMesh();
 
 		GetWorld()->GetTimerManager().SetTimer(DestroyDelayTimer, [this]
 		{
@@ -259,7 +283,6 @@ void AThirdPersonMPCharacter::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AThirdPersonMPCharacter, CurrentHealth);
-	DOREPLIFETIME(AThirdPersonMPCharacter, bDead);
 	DOREPLIFETIME(AThirdPersonMPCharacter, MyLastDamageInstigator);
 }
 

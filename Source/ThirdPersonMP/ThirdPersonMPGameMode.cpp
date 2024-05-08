@@ -4,6 +4,7 @@
 
 #include "ThirdPersonMPCharacter.h"
 #include "ThirdPersonPlayerController.h"
+#include "GameFramework/PlayerState.h"
 #include "UObject/ConstructorHelpers.h"
 
 AThirdPersonMPGameMode::AThirdPersonMPGameMode()
@@ -35,5 +36,20 @@ void AThirdPersonMPGameMode::RestartPlayer(AController* NewPlayer)
 			GetWorld()->SpawnActor<APawn>(DefaultPawnClass,
 				FindPlayerStart(NewPlayer)->GetTransform()) 
 		);
+	}
+}
+
+void AThirdPersonMPGameMode::HandlePlayerKilled_Implementation(AController* InKiller, AController* InVictim)
+{
+	IThirdPersonGameModeInterface::HandlePlayerKilled_Implementation(InKiller, InVictim);
+
+	if(InKiller && InKiller != InVictim)
+	{
+		IThirdPersonStatsInterface::Execute_AddKill(InKiller->PlayerState);
+	}
+
+	if(InVictim)
+	{
+		IThirdPersonStatsInterface::Execute_AddDeath(InVictim->PlayerState);
 	}
 }

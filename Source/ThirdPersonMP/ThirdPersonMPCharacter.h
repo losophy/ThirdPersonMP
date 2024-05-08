@@ -78,6 +78,22 @@ public:
 protected:
 	
 #pragma region Gameplay
+
+#pragma region Visual
+protected:
+
+	// Material instance to pain the character's mesh in, when he is dead
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Visual")
+	TSoftObjectPtr<UMaterialInstance> DeathMaterialInstance;
+
+	// Paints each client's mesh to the death material instance when killed. Must be called cautiously
+	UFUNCTION(NetMulticast, Reliable)
+	void PaintMesh();
+
+	// Handler for asynchronous soft object reference loading
+	void OnMaterialInstanceLoad();
+	
+#pragma endregion
 	
 #pragma region Health
 
@@ -89,7 +105,7 @@ protected:
 	UPROPERTY(ReplicatedUsing=OnRep_CurrentHealth)
 	float CurrentHealth;
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_bDead, Category="Character|Health")
+	UPROPERTY(BlueprintReadOnly, Category="Character|Health")
 	bool bDead;
 
 	// Triggered when player's health is updated.
@@ -115,11 +131,7 @@ public:
 	// Function that is triggered in response to CurrentHealth variable being replicated
 	UFUNCTION()
 	void OnRep_CurrentHealth();
-	void OnDeathUpdate();
-
-	UFUNCTION()
-	void OnRep_bDead();
-
+	
 	FORCEINLINE FOnPlayerHealthUpdateSignature& GetOnPlayerHealthUpdate() noexcept
 	{ return OnPlayerHealthUpdate; }
 
@@ -127,6 +139,9 @@ protected:
 
 	// Called from OnRep_CurrentHealth after CurrentHealth was replicated
 	void OnHealthUpdate() noexcept;
+
+	// Called on the server and all other updates stats are replicated to clients
+	void OnDeathUpdate();
 
 #pragma endregion
 	
