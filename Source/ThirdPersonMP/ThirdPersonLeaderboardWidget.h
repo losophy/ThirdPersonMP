@@ -23,6 +23,10 @@ protected:
 	// Internal pointer to player state from which we get stats data info
 	UPROPERTY(BlueprintReadOnly, Transient, Category="Stats")
 	AThirdPersonPlayerState* PlayerState = nullptr;
+
+	// Triggered whenever attached player state's stats were updated
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "On Stats Updated"), Category="Stats")
+	void K2_OnStatsChanged(struct FPlayerStats const& InChangedStats);
 	
 	// Override to initialize data
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;

@@ -2,7 +2,6 @@
 
 
 #include "ThirdPersonLeaderboardWidget.h"
-#include "ThirdPersonMPCharacter.h"
 #include "ThirdPersonPlayerState.h"
 #include "Components/ListView.h"
 #include "GameFramework/GameStateBase.h"
@@ -14,14 +13,17 @@ void UThirdPersonLeaderboardElement::NativeOnListItemObjectSet(UObject* ListItem
 		ensureMsgf(AsPlayerState, TEXT("Bad user object cast!")))
 	{
 		PlayerState = AsPlayerState;
+		PlayerState->GetOnStatsChanged().AddUniqueDynamic(this, &UThirdPersonLeaderboardElement::K2_OnStatsChanged);
 	}
+
+	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
 }
 
 void UThirdPersonLeaderboardWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	
-	// Set the list
+	// Set the list to the player states
 	auto const GameState = UGameplayStatics::GetGameState(this);
 	PlayersList->SetListItems(GameState->PlayerArray);
 }

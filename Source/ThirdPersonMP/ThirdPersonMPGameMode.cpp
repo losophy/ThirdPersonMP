@@ -7,6 +7,8 @@
 #include "GameFramework/PlayerState.h"
 #include "UObject/ConstructorHelpers.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogTPGameMode, Log, All);
+
 AThirdPersonMPGameMode::AThirdPersonMPGameMode()
 {
 	// set default pawn class to our Blueprinted character
@@ -43,13 +45,13 @@ void AThirdPersonMPGameMode::HandlePlayerKilled_Implementation(AController* InKi
 {
 	IThirdPersonGameModeInterface::HandlePlayerKilled_Implementation(InKiller, InVictim);
 
-	if(InKiller && InKiller != InVictim)
+	if((InKiller && InVictim) && InKiller != InVictim)
 	{
 		IThirdPersonStatsInterface::Execute_AddKill(InKiller->PlayerState);
+		IThirdPersonStatsInterface::Execute_AddDeath(InVictim->PlayerState);
+
+		UE_LOG(LogTPGameMode, Log, TEXT("Player %s killed %s"), *GetNameSafe(InKiller),
+			*GetNameSafe(InVictim));
 	}
 
-	if(InVictim)
-	{
-		IThirdPersonStatsInterface::Execute_AddDeath(InVictim->PlayerState);
-	}
 }

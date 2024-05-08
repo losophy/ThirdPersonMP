@@ -8,16 +8,19 @@
 void AThirdPersonPlayerState::AddKill_Implementation()
 {
 	Stats.KillsCount++;
+	OnStatsChanged.Broadcast(Stats);
 }
 
 void AThirdPersonPlayerState::AddDeath_Implementation()
 {
 	Stats.DeathsCount++;
+	OnStatsChanged.Broadcast(Stats);
 }
 
 void AThirdPersonPlayerState::AddScore_Implementation(float const InAddedScore)
 {
 	Stats.Score += InAddedScore;
+	OnStatsChanged.Broadcast(Stats);
 }
 
 void AThirdPersonPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

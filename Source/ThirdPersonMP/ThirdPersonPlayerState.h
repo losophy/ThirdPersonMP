@@ -26,6 +26,9 @@ struct FPlayerStats
 	float Score = 0.f;
 };
 
+// Declare delegate for stats changing notification
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStatsChangedSignature, FPlayerStats const&, InNewStats);
+
 /**
  * Individual player's stats
  */
@@ -45,12 +48,18 @@ public:
 	// Retrieves current player's stats
 	UFUNCTION(BlueprintPure, Category="Stats")
 	FORCEINLINE FPlayerStats GetPlayerStats() const noexcept { return Stats; }
+
+	FORCEINLINE FOnStatsChangedSignature& GetOnStatsChanged() noexcept { return OnStatsChanged; }
 	
 protected:
 
 	/* Actual player's stats. Replicated to all clients */
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Stats")
 	FPlayerStats Stats;
+
+	// Triggered whenever stats are changed.
+	UPROPERTY(BlueprintAssignable, Category="Stats")
+	FOnStatsChangedSignature OnStatsChanged;
 
 	// Override to define replicated variables
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
