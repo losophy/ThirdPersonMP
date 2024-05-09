@@ -23,6 +23,11 @@ void AThirdPersonPlayerState::AddScore_Implementation(float const InAddedScore)
 	OnStatsChanged.Broadcast(Stats);
 }
 
+void AThirdPersonPlayerState::OnRep_Stats()
+{
+	OnStatsChanged.Broadcast(Stats);
+}
+
 void AThirdPersonPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

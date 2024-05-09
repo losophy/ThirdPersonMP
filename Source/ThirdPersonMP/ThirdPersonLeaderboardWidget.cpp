@@ -2,6 +2,8 @@
 
 
 #include "ThirdPersonLeaderboardWidget.h"
+
+#include "ThirdPersonGameState.h"
 #include "ThirdPersonPlayerState.h"
 #include "Components/ListView.h"
 #include "GameFramework/GameStateBase.h"
@@ -19,11 +21,30 @@ void UThirdPersonLeaderboardElement::NativeOnListItemObjectSet(UObject* ListItem
 	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
 }
 
+void UThirdPersonLeaderboardWidget::OnPlayerStatesChange()
+{
+	// Redraw newly added or removed player states
+	auto const LGameState = UGameplayStatics::GetGameState(this);
+	if(auto const LTPGameState = Cast<AThirdPersonGameState>(LGameState))
+	{
+		PlayersList->SetListItems(LTPGameState->PlayerArray);
+	}
+
+	PlayersList->RegenerateAllEntries();
+}
+
 void UThirdPersonLeaderboardWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	
 	// Set the list to the player states
-	auto const GameState = UGameplayStatics::GetGameState(this);
-	PlayersList->SetListItems(GameState->PlayerArray);
+	auto const LGameState = UGameplayStatics::GetGameState(this);
+	if(auto const LTPGameState = Cast<AThirdPersonGameState>(LGameState))
+	{
+		LTPGameState->OnPlayerStateAdded.AddUObject(this, &UThirdPersonLeaderboardWidget::OnPlayerStatesChange);
+		LTPGameState->OnPlayerStateRemoved.AddUObject(this, &UThirdPersonLeaderboardWidget::OnPlayerStatesChange);
+		PlayersList->SetListItems(LTPGameState->PlayerArray);
+	}
+	
+	PlayersList->RegenerateAllEntries();
 }

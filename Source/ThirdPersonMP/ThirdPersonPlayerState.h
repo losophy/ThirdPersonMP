@@ -54,12 +54,16 @@ public:
 protected:
 
 	/* Actual player's stats. Replicated to all clients */
-	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Stats")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Stats, Category = "Stats")
 	FPlayerStats Stats;
 
 	// Triggered whenever stats are changed.
 	UPROPERTY(BlueprintAssignable, Category="Stats")
 	FOnStatsChangedSignature OnStatsChanged;
+
+	// Triggered when stats are changed
+	UFUNCTION()
+	void OnRep_Stats();
 
 	// Override to define replicated variables
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

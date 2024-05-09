@@ -10,6 +10,18 @@ void AThirdPersonGameState::SetConnectedPlayers(int32 const InNewValue)
 	OnPlayerChangedConnection.Broadcast(ConnectedPlayers);
 }
 
+void AThirdPersonGameState::AddPlayerState(APlayerState* PlayerState)
+{
+	Super::AddPlayerState(PlayerState);
+	OnPlayerStateAdded.Broadcast();
+}
+
+void AThirdPersonGameState::RemovePlayerState(APlayerState* PlayerState)
+{
+	Super::RemovePlayerState(PlayerState);
+	OnPlayerStateRemoved.Broadcast();
+}
+
 void AThirdPersonGameState::OnRep_ConnectedPlayers()
 {
 	OnPlayerChangedConnection.Broadcast(ConnectedPlayers);

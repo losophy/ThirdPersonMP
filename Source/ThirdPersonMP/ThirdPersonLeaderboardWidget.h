@@ -49,6 +49,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (BindWidget = true), Category = "Widgets")
 	class UListView* PlayersList;
 
+	void OnPlayerStatesChange();
+	
 	// Override to initialize the players list
 	virtual void NativeConstruct() override;
 };
