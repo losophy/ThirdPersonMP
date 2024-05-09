@@ -2,6 +2,7 @@
 
 #include "ThirdPersonMPGameMode.h"
 
+#include "ThirdPersonGameState.h"
 #include "ThirdPersonMPCharacter.h"
 #include "ThirdPersonPlayerController.h"
 #include "GameFramework/PlayerState.h"
@@ -28,6 +29,7 @@ AThirdPersonMPGameMode::AThirdPersonMPGameMode()
 	{
 		PlayerControllerClass = AThirdPersonPlayerController::StaticClass();
 	}
+	
 }
 
 void AThirdPersonMPGameMode::RestartPlayer(AController* NewPlayer)
@@ -54,4 +56,25 @@ void AThirdPersonMPGameMode::HandlePlayerKilled_Implementation(AController* InKi
 			*GetNameSafe(InVictim));
 	}
 
+}
+
+void AThirdPersonMPGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	if(auto const LTPGameState = Cast<AThirdPersonGameState>(GameState);
+		ensureMsgf(LTPGameState, TEXT("Bad game state cast! Game state: %s"), *GetNameSafe(GameState)))
+	{
+		LTPGameState->SetConnectedPlayers(LTPGameState->ConnectedPlayers + 1);
+	}
+}
+
+void AThirdPersonMPGameMode::Logout(AController* Exiting)
+{
+	Super::Logout(Exiting);
+	if(auto const LTPGameState = Cast<AThirdPersonGameState>(GameState);
+		ensureMsgf(LTPGameState, TEXT("Bad game state cast! Game state: %s"), *GetNameSafe(GameState)))
+	{
+		LTPGameState->SetConnectedPlayers(LTPGameState->ConnectedPlayers - 1);
+	}
 }

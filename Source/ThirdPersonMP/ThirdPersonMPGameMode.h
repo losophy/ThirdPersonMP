@@ -7,6 +7,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "ThirdPersonMPGameMode.generated.h"
 
+
 UCLASS(minimalapi)
 class AThirdPersonMPGameMode : public AGameModeBase, public IThirdPersonGameModeInterface
 {
@@ -30,6 +31,16 @@ public:
 	
 #pragma endregion
 	
+#pragma endregion
+
+#pragma region Network
+protected:
+	
+	// Override to increment the connected players
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+	// Override to decrement the connected players
+	virtual void Logout(AController* Exiting) override;
 #pragma endregion
 };
 

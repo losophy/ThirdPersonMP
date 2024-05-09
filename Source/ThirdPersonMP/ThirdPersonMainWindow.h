@@ -18,6 +18,19 @@ protected:
 
 	// Override to initialized players num
 	virtual void NativeOnInitialized() override;
+
+	virtual void NativeConstruct() override;
+
+	// Implementable event for handling widget redrawing
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName = "Redraw"), Category="UI")
+	void K2_RedrawWidget();
+
+#pragma region Network
+
+	// Triggered when the number of players changed in the game
+	void OnPlayerNumChanged(int32 const NewPlayerNum);
+	
+#pragma endregion
 	
 #pragma region Health
 public:
@@ -40,7 +53,7 @@ protected:
 	// The amount of players currently in the
 	// world that is displayed locally for each user
 	UPROPERTY(BlueprintReadOnly, Category="UI|Stats")
-	int32 PlayersNum = 0;
+	int32 PlayerNum = 1;
 
 	// The actual widget of leaderboard that is displayed at the center for a player
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Transient, meta=(BindWidget = true), Category = "UI")
@@ -54,6 +67,9 @@ public:
 	// Hides leaderboard widget
 	UFUNCTION(BlueprintCallable, Category="UI|Stats")
 	void HideLeaderboard();
+
+	// Sets players num variable
+	FORCEINLINE void SetPlayerNum(int32 const InNewPlayerNum) { PlayerNum = InNewPlayerNum; }
 	
 #pragma endregion
 };

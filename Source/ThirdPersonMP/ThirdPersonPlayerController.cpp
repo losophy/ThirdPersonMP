@@ -6,6 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "ThirdPersonMPCharacter.h"
 #include "ThirdPersonMainWindow.h"
+#include "ThirdPersonMPGameMode.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
@@ -65,6 +66,7 @@ void AThirdPersonPlayerController::OnPawnHealthUpdate(float const InUpdatedHealt
 void AThirdPersonPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	// We want to create UI only locally for a player.
 	if(IsLocalController())
 	{
@@ -72,7 +74,6 @@ void AThirdPersonPlayerController::BeginPlay()
 		MainWindow = CreateWidget<UThirdPersonMainWindow>(this, MainWindowClass);
 		MainWindow->AddToViewport();
 	}
-	
 }
 
 void AThirdPersonPlayerController::SetupInputComponent()

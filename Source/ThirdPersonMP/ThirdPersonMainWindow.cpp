@@ -3,15 +3,35 @@
 
 #include "ThirdPersonMainWindow.h"
 
+#include "ThirdPersonGameState.h"
 #include "ThirdPersonLeaderboardWidget.h"
 #include "Kismet/GameplayStatics.h"
 
 void UThirdPersonMainWindow::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-	
-	PlayersNum = UGameplayStatics::GetNumPlayerStates(this);
 	LeaderboardWidget->SetVisibility(ESlateVisibility::Collapsed);  // Hide by default
+}
+
+void UThirdPersonMainWindow::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	auto const GameState = UGameplayStatics::GetGameState(this);
+	if(auto const LTPGameState =
+		Cast<AThirdPersonGameState>(GameState);
+		ensureMsgf(LTPGameState, TEXT("Bad game state cast! Given state ref: %s"), *GetNameSafe(GameState)))
+	{
+		LTPGameState->OnPlayerChangedConnection.AddUObject(this, &UThirdPersonMainWindow::OnPlayerNumChanged);
+		SetPlayerNum(LTPGameState->ConnectedPlayers);
+		K2_RedrawWidget();
+	}
+}
+
+void UThirdPersonMainWindow::OnPlayerNumChanged(int32 const NewPlayerNum)
+{
+	SetPlayerNum(NewPlayerNum);
+	K2_RedrawWidget();
 }
 
 void UThirdPersonMainWindow::UpdateHealth(float const InNewHealth)
