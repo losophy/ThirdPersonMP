@@ -53,8 +53,7 @@ SourceArt/**/*.tga
 
 # Built data for maps
 *_BuiltData.uasset
-*.uasset
-*.umap
+
 
 
 #backup asset folder
