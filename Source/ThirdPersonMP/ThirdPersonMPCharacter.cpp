@@ -61,14 +61,16 @@ AThirdPersonMPCharacter::AThirdPersonMPCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
+	//初始化玩家生命值
 	MaxHealth = 100.f;
 	CurrentHealth = MaxHealth;
 
 	MyLastDamageInstigator = nullptr;
 
-	// Initialize fire specific memebers
+	// 初始化射速
 	FireRate = 0.25f;
 	bFiringWeapon = false;
+	//初始化投射物类
 	ProjectileClass = AThirdPersonProjectile::StaticClass();
 
 	// Initialize destruction vars
@@ -136,7 +138,7 @@ void AThirdPersonMPCharacter::OnHealthUpdate() noexcept
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
 		FString::Printf(TEXT("My role is %s"), GetLocalRole() == ROLE_Authority ? TEXT("Authority") : TEXT("Client")));
 	
-	// Specific to local player (Client)
+	// 客户端特定的功能
 	if(IsLocallyControlled())
 	{
 		FString const LHealthMessage = FString::Printf(TEXT("You now have %f health remaining."), CurrentHealth);
@@ -149,7 +151,7 @@ void AThirdPersonMPCharacter::OnHealthUpdate() noexcept
 		}
 	}
 
-	// Server specific logic
+	// 服务器特定的功能
 	if(GetLocalRole() == ROLE_Authority)
 	{
 		FString const LHealthMessage = FString::Printf(TEXT("%s now have %f health remaining."), *GetFName().ToString(), CurrentHealth);
@@ -278,10 +280,12 @@ void AThirdPersonMPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 	}
 }
 
+// 复制的属性
 void AThirdPersonMPCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	//复制当前生命值。
 	DOREPLIFETIME(AThirdPersonMPCharacter, CurrentHealth);
 	DOREPLIFETIME(AThirdPersonMPCharacter, MyLastDamageInstigator);
 }

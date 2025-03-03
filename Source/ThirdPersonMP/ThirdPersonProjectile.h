@@ -15,19 +15,19 @@ class THIRDPERSONMP_API AThirdPersonProjectile : public AActor
 
 protected:
 	
-	// Sphere component for testing collision
+	// 用于测试碰撞的球体组件。
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = true), Category = "Components")
 	class USphereComponent* SphereComponent;
 
-	// Static mesh component for visual representation
+	// 用于提供对象视觉呈现效果的静态网格体。
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = true), Category = "Components")
 	class UStaticMeshComponent* StaticMesh;
 
-	// Projectile movement component for moving this object.
+	// 用于处理投射物移动的移动组件。
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = true), Category = "Components")
 	class UProjectileMovementComponent* ProjectileMovementComponent;
 
-	// Explosion effect that is spawned at the location of this projectile destuction
+	// 在投射物撞击其他对象并爆炸时使用的粒子。
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = true), Category = "Components")
 	UParticleSystem* ExplosionEffect;
 	
@@ -37,11 +37,11 @@ protected:
 	
 protected:
 
-	// User defined damage type to apply to a damaged actor
+	// 此投射物将造成的伤害类型和伤害。
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Gameplay")
 	TSubclassOf<class UDamageType> DamageType;
 
-	// The actual damage dealt to hit actor
+	// 此投射物造成的伤害。
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Gameplay")
 	float Damage;
 

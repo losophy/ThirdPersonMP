@@ -18,18 +18,20 @@ AThirdPersonProjectile::AThirdPersonProjectile()
 	// Enable replication
 	bReplicates = true;
 
-	// Setup sphere component
+	// 定义将作为投射物及其碰撞的根组件的SphereComponent。
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
 	SphereComponent->InitSphereRadius(37.5f);
 	SphereComponent->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+	//在击中事件上注册此投射物撞击函数。
 	SphereComponent->OnComponentHit.AddDynamic(this, &AThirdPersonProjectile::OnProjectileImpact);
 	RootComponent = SphereComponent;
 
-	// Setup static mesh component
+	// 定义将作为视觉呈现的网格体。
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> DefaultMesh(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	StaticMesh->SetupAttachment(RootComponent);
 
+	//若成功找到要使用的静态网格体资产，则设置该静态网格体及其位置/比例。
 	if(DefaultMesh.Succeeded())
 	{
 		StaticMesh->SetStaticMesh(DefaultMesh.Object);
@@ -37,7 +39,7 @@ AThirdPersonProjectile::AThirdPersonProjectile()
 		StaticMesh->SetRelativeScale3D(FVector{0.75f, 0.75f, 0.75f}); // Should match the SphereComponent's size
 	}
 
-	// Setup Projectile movement
+	// 定义投射物移动组件。
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("MovementComponent"));
 	ProjectileMovementComponent->InitialSpeed = 1500.f;
 	ProjectileMovementComponent->MaxSpeed = 1500.f;

@@ -97,11 +97,11 @@ protected:
 	
 #pragma region Health
 
-	// Max health that isn't changed throughout the whole game
+	// 玩家的最大生命值。这是玩家的最高生命值。此值为玩家出生时的生命值。
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Health")
 	float MaxHealth;
 
-	// Current health of this character. By default is set to MaxHealth
+	// 玩家的当前生命值。降到0就表示死亡。
 	UPROPERTY(ReplicatedUsing=OnRep_CurrentHealth)
 	float CurrentHealth;
 
@@ -114,21 +114,21 @@ protected:
 	
 public:
 
-	// Setter for current health. Should only be called on the server. Ensured to be called on the server
+	// 当前生命值的存值函数。将此值的范围限定在0到MaxHealth之间，并调用OnHealthUpdate。仅在服务器上调用。
 	UFUNCTION(BlueprintCallable, Category="Character|Health")
 	void SetCurrentHealth(float const InHealthValue) noexcept;
 
-	// Returns CurrentHealth
+	// 最大生命值的取值函数
 	UFUNCTION(BlueprintPure, Category="Character|Health")
 	FORCEINLINE float GetMaxHealth() const noexcept
 	{ return MaxHealth; }
 	
-	// Returns MaxHealth
+	// 当前生命值的取值函数
 	UFUNCTION(BlueprintPure, Category="Character|Health")
 	FORCEINLINE float GetCurrentHealth() const noexcept
 	{ return CurrentHealth; }
 
-	// Function that is triggered in response to CurrentHealth variable being replicated
+	// RepNotify，用于同步对当前生命值所做的更改。
 	UFUNCTION()
 	void OnRep_CurrentHealth();
 	
@@ -137,7 +137,7 @@ public:
 
 protected:
 
-	// Called from OnRep_CurrentHealth after CurrentHealth was replicated
+	// 响应要更新的生命值。修改后，立即在服务器上调用，并在客户端上调用以响应RepNotify
 	void OnHealthUpdate() noexcept;
 
 	// Called on the server and all other updates stats are replicated to clients
@@ -151,6 +151,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Transient, Replicated, Category="Damage")
 	AController* MyLastDamageInstigator;
 	
+	/** 承受伤害的事件。从APawn覆盖。*/
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	
 #pragma endregion
@@ -163,11 +164,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Fire")
 	TSubclassOf<class AThirdPersonProjectile> ProjectileClass;
 	
-	// Controls how often the player can fire his weapon. Keep it at least 0.25 as frequent RPC calls may overflow the bandwith
+	// 射击之间的延迟，单位为秒。用于控制测试发射物的射击速度，还可防止服务器函数的溢出导致将SpawnProjectile直接绑定至输入。
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Character|Fire")
 	float FireRate;
 
-	// State flag to control firing flow
+	// 若为true，则正在发射投射物。
 	bool bFiringWeapon;
 
 	// Timer handle for waiting the fire rate time
@@ -175,15 +176,15 @@ protected:
 
 	//@Note: StartFire and StopFire are protections measures from frequent RPC calls
 	
-	// Function that is bound to FireAction input and is the starting point of the action
+	// 用于启动武器射击的函数。
 	UFUNCTION(BlueprintCallable, Category="Character|Fire")
 	void StartFire();
 
-	// Function that stops firing, which allows player to perform action again. 
+	// 用于结束武器射击的函数。一旦调用这段代码，玩家可再次使用StartFire。
 	UFUNCTION(BlueprintCallable,  Category="Character|Fire")
 	void StopFire();
 
-	// Function that is called on the server. It is reliable and should be called with caution, avoiding any frequent use
+	// 用于生成投射物的服务器函数。本项目中实现的唯一RPC
 	UFUNCTION(Server, Reliable)
 	void HandleFire();
 	
@@ -223,7 +224,7 @@ protected:
 	
 protected:
 	
-	// Add new replicated properties to this function if any appear
+	// 属性复制
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
