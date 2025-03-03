@@ -9,10 +9,10 @@
 #include "Particles/ParticleSystem.h"
 
 
-// Sets default values
+// 设置默认值
 AThirdPersonProjectile::AThirdPersonProjectile()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+ 	// 将此Actor设置为每一帧调用Tick()。如果不需要，可以关闭此选项来提高性能。
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Enable replication
@@ -60,7 +60,7 @@ AThirdPersonProjectile::AThirdPersonProjectile()
 	DamageableTypes = {};
 }
 
-// Called when the game starts or when spawned
+// 当游戏开始或生成时调用
 void AThirdPersonProjectile::BeginPlay()
 {
 	Super::BeginPlay();
@@ -103,7 +103,7 @@ void AThirdPersonProjectile::OnProjectileImpact(UPrimitiveComponent* HitComponen
 	Destroy();
 }
 
-// Called every frame
+// 每一帧调用
 void AThirdPersonProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

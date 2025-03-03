@@ -63,11 +63,11 @@ protected:
 	
 public:
 	
-	// Sets default values for this actor's properties
+	// 为此Actor的属性设置默认值
 	AThirdPersonProjectile();
 
 protected:
-	// Called when the game starts or when spawned
+	// 当游戏开始或生成时调用
 	virtual void BeginPlay() override;
 	virtual void Destroyed() override;
 
@@ -80,7 +80,7 @@ protected:
 #pragma endregion
 
 public:	
-	// Called every frame
+	// 每一帧调用
 	virtual void Tick(float DeltaTime) override;
 
 };

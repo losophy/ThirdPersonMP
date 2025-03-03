@@ -26,20 +26,20 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 AThirdPersonMPCharacter::AThirdPersonMPCharacter()
 {
-	// Set size for collision capsule
+	// 设置碰撞胶囊体的大小
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 		
-	// Don't rotate when the controller rotates. Let that just affect the camera.
+	// 控制器旋转时不旋转。只影响摄像机。
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-	// Configure character movement
+	// 配置角色移动
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
 
-	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
-	// instead of recompiling to adjust them
+	// 注意：为了提高迭代速度，可在角色蓝图中微调这些及其他许多变量，
+	// 而不是通过重新编译来调整它们
 	GetCharacterMovement()->JumpZVelocity = 700.f;
 	GetCharacterMovement()->AirControl = 0.35f;
 	GetCharacterMovement()->MaxWalkSpeed = 500.f;
@@ -50,16 +50,16 @@ AThirdPersonMPCharacter::AThirdPersonMPCharacter()
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
-	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
+	CameraBoom->TargetArmLength = 400.0f; // 摄像机以这个距离跟在角色身后
+	CameraBoom->bUsePawnControlRotation = true; // 基于控制器旋转吊臂
 
-	// Create a follow camera
+	// 创建跟随摄像头
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // 将摄像机连接到吊杆末端，调节吊杆以匹配控制器方向
+	FollowCamera->bUsePawnControlRotation = false; // 摄像机不相对于吊臂旋转
 
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
-	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+	// 注意：骨架网格体和网格体组件上的动画蓝图引用（继承自角色）
+	// 都在名为MyCharacter的派生蓝图资产中设置（以避免C++环境下的直接内容引用）
 
 	//初始化玩家生命值
 	MaxHealth = 100.f;
@@ -165,7 +165,10 @@ void AThirdPersonMPCharacter::OnHealthUpdate() noexcept
 		}
 	}
 
-	// Any other logic to trigger both on server or client shoudl be added here
+	//在所有机器上都执行的函数。
+		/*
+			因任何因伤害或死亡而产生的特殊功能都应放在这里。
+		*/
 
 	// Broadcast health update both locally and on the server
 	OnPlayerHealthUpdate.Broadcast(CurrentHealth);
@@ -258,7 +261,7 @@ void AThirdPersonMPCharacter::BeginPlay()
 
 void AThirdPersonMPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	// Set up action bindings
+	// 设置游戏进程键绑定
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
 		
 		// Jumping
@@ -271,7 +274,7 @@ void AThirdPersonMPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AThirdPersonMPCharacter::Look);
 
-		// Fire action
+		// 处理发射投射物
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AThirdPersonMPCharacter::StartFire);
 	}
 	else

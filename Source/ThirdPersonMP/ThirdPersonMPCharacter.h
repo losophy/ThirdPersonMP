@@ -26,11 +26,11 @@ class AThirdPersonMPCharacter : public ACharacter
 	
 #pragma region Components
 	
-	/** Camera boom positioning the camera behind the character */
+	/** 摄像机吊杆将摄像机置于角色身后 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
 
-	/** Follow camera */
+	/** 跟随摄像机 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 	
@@ -60,7 +60,7 @@ protected:
 	
 protected:
 	
-	// APawn interface
+	// APawn接口
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	/** Called for movement input */
@@ -171,12 +171,12 @@ protected:
 	// 若为true，则正在发射投射物。
 	bool bFiringWeapon;
 
-	// Timer handle for waiting the fire rate time
+	// 定时器句柄，用于提供生成间隔时间内的射速延迟。
 	FTimerHandle FiringTimer;
 
 	//@Note: StartFire and StopFire are protections measures from frequent RPC calls
 	
-	// 用于启动武器射击的函数。
+	// 用于启动武器发射的函数。应仅可由本地玩家触发。
 	UFUNCTION(BlueprintCallable, Category="Character|Fire")
 	void StartFire();
 
@@ -228,7 +228,7 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
-	/** Returns CameraBoom subobject **/
+	/** 返回CameraBoom子对象 **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
